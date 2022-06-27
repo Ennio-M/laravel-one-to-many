@@ -47,12 +47,7 @@ class PostController extends Controller
         $newPost->content = $data['content'];
         $newPost->published = isset($data['published']);
         $newPost->category_id = $data['category_id'];
-        $c = 1;
-        while(Post::where('slug', $slug)->first()){
-            $slug = Str::of($data['title'])->slug("-") . "-{$c}";
-            $c++;
-        }
-        $newPost->slug = $slug;
+        $newPost->slug = $this->getSlug($newPost->title);
         $newPost->save();
         return redirect()->route('admin.posts.show', $newPost->id);
     }
@@ -74,9 +69,10 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Post $post)
     {
-        return view('admin.posts.edit');
+        $categories = Category::all();
+        return view('admin.posts.edit', compact('post', 'categories'));
     }
 
     /**
@@ -86,9 +82,21 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Post $post)
     {
-        //
+        $data = $request->all();
+        if($post->title != $data['title']){
+            $post->title = $data['title'];
+            $slug = Str::of($post->title)->slug('-');
+            if($slug != $post->slug){
+                $post->slug = $this->getSlug($post->title);
+            }
+        }
+        $post->category_id = $data['category_id'];
+        $post->content = $data['content'];
+        $post->published = isset($data['published']);
+        $post->update();
+        return redirect()->route('admin.posts.show', $post->id);
     }
 
     /**
@@ -100,5 +108,14 @@ class PostController extends Controller
     public function destroy($id)
     {
         //
+    }
+    private function getSlug($title) {
+        $slug = Str::of($title)->slug('-');
+        $c = 1;
+        while(Post::where('slug', $slug)->first()){
+            $slug = Str::of($title)->slug('-')."-{$c}";
+            $c++;
+        }
+        return $slug;
     }
 }
