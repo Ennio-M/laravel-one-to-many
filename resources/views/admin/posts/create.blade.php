@@ -11,6 +11,15 @@
             <label for="content" class="form-label">Content</label>
             <textarea type="password" class="form-control" id="content" name="content" cols="10" rows="10">{{old('content')}}</textarea>
         </div>
+        <div class="mb-3">
+            <label for="category_id" class="form-label">Category</label>
+            <select name="category_id" id="category_id" class="form-control">
+                <option value="">Select category</option>
+                @foreach ($categories as $category)
+                    <option value="{{$category->id}}">{{$category->name}}</option>
+                @endforeach
+            </select>
+        </div>
         <div class="mb-3 form-check">
             <input type="checkbox" class="form-check-input" id="published" name="published" {{old('published') ? 'checked' : ''}}>
             <label class="form-check-label" for="published">Published</label>
